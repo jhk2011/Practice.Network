@@ -1,4 +1,6 @@
 import java.net.Socket;
+import java.nio.channels.Channel;
+import java.nio.channels.SocketChannel;
 
 class MySocketServer extends SocketServer{
     @Override
@@ -6,3 +8,4 @@ class MySocketServer extends SocketServer{
         return new MySession(socket);
     }
 }
+

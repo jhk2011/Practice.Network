@@ -4,15 +4,15 @@ import java.net.Socket;
 
 class SocketClient extends SocketSession{
 
-    public void connect(String host,int port)  {
+
+    public SocketClient() {
+        super(null);
+    }
+
+    public void connect(String host, int port)  {
         try {
-
             socket = new Socket();
-
             socket.connect(new InetSocketAddress(host,port));
-
-            converter = new DefaultSocketConverter(this,null);
-
         } catch (IOException e) {
             e.printStackTrace();
         }

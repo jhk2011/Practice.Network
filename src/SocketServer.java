@@ -10,14 +10,12 @@ import java.util.Iterator;
 import java.util.List;
 
 public class SocketServer {
+
     List<SocketSession> sessions = Collections.synchronizedList(new ArrayList<SocketSession>());
 
     ServerSocket socket;
 
-    Selector selector;
-
-    ServerSocketChannel channel;
-
+    Thread thread;
 
     public void initialize(int port,int backlog){
         try {
@@ -29,29 +27,42 @@ public class SocketServer {
     }
 
     public void start(){
-        Thread thread = new Thread(new Runnable() {
+
+        if(thread!=null)throw  new RuntimeException("already start");
+
+        thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true){
-                    try {
-                        Socket client= socket.accept();
-
-                        SocketSession session = getSession(client);
-
-                        sessions.add(session);
-
-                        session.start();
-
-                        onAccept(session);
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        throw new RuntimeException();
-                    }
-                }
+                accept();
             }
         });
+
         thread.start();
+    }
+
+    private void accept() {
+        while (true){
+            try {
+
+                System.out.println("accept");
+
+                Socket client= socket.accept();
+
+                System.out.println("accept ok:"+ client.getRemoteSocketAddress());
+
+                SocketSession session = getSession(client);
+
+                sessions.add(session);
+
+                onAccept(session);
+
+                session.start();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException();
+            }
+        }
     }
 
     protected SocketSession getSession(Socket socket){
@@ -59,7 +70,7 @@ public class SocketServer {
     }
 
     protected void onAccept(SocketSession session){
-        System.out.println("accept");
-    }
 
+    }
 }
+

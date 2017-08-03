@@ -2,7 +2,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-class  SocketSession{
+
+public class SocketSession {
 
     protected Socket socket;
 
@@ -10,53 +11,55 @@ class  SocketSession{
 
     List<SocketHandler> handlers = new ArrayList<SocketHandler>();
 
-    public SocketSession(){
-        this(null);
-    }
+    Thread thread;
 
     public SocketSession(Socket socket){
         this.socket=socket;
     }
 
     public void addHandler(SocketHandler handler){
-
         handlers.add(handler);
     }
 
     public void start(){
 
-        Thread thread = new Thread(new Runnable() {
+        if(thread!=null)throw new RuntimeException("already start");
+
+        onStart();
+
+        thread = new Thread(new Runnable() {
             @Override
             public void run() {
-
-                while (true){
-                    try {
-
-                        Object packet = converter.read();
-
-                        if(packet==null){
-                            onClose();
-                            break;
-                        }
-
-                        onReceived(packet);
-
-                    } catch (Exception e) {
-                        break;
-                    }
-                }
-
+                receive();
             }
         });
 
         thread.start();
     }
 
+    private void receive() {
+        while (true){
+            try {
+
+                System.out.println("start receive");
+
+                Object packet = converter.read();
+
+                System.out.println("receive ok");
+
+                onReceived(packet);
+
+            } catch (Exception e) {
+               onClose();
+               break;
+            }
+        }
+    }
+
     protected void onReceived(Object packet){
         for (SocketHandler handler:handlers) {
             handler.received(packet);
         }
-        //write(packet);
     }
 
     public void send(Object packet)
@@ -70,4 +73,12 @@ class  SocketSession{
         }
     }
 
+    protected void onStart(){
+        this.converter = new DefaultSocketConverter(this,null);
+        for (SocketHandler handler:handlers) {
+            handler.start();
+        }
+    }
 }
+
+

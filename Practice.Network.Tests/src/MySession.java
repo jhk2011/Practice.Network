@@ -1,13 +1,12 @@
 import java.net.Socket;
+import java.nio.channels.SocketChannel;
 
 class MySession extends SocketSession{
 
-    public MySession() {
-        this.addHandler(new SocketHandler() {
-            @Override
-            public void close() {
 
-            }
+    public MySession(Socket socket) {
+        super(socket);
+        this.addHandler(new SocketHandler() {
 
             @Override
             public void received(Object packet) {
@@ -16,8 +15,6 @@ class MySession extends SocketSession{
             }
         });
     }
-
-    public MySession(Socket socket) {
-        super(socket);
-    }
 }
+
+

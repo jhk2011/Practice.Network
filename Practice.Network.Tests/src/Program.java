@@ -11,7 +11,9 @@ public class Program {
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        startServer();
+        //startServer();
+
+        startAsyncServer();
 
         Thread.sleep(200);
 
@@ -21,7 +23,15 @@ public class Program {
     }
 
     private static void startServer(){
-        SocketServer server = new SocketServer();
+
+        MySocketServer server = new MySocketServer();
+
+        server.initialize(1899,100);
+        server.start();
+    }
+
+    private static void startAsyncServer(){
+        MyAsyncSocketServer server = new MyAsyncSocketServer();
 
         server.initialize(1899,100);
         server.start();
@@ -32,19 +42,15 @@ public class Program {
 
         client.addHandler(new SocketHandler() {
             @Override
-            public void close() {
-                System.out.println("断开连接");
-            }
-
-            @Override
             public void received(Object packet) {
-                client.send(packet);
+                System.out.println("client received:"+packet);
             }
         });
 
         client.connect("127.0.0.1",1899);
         //client.connect("www.baidu.com",80);
         client.start();
+
         client.send("hello");
     }
 }

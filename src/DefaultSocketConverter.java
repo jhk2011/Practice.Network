@@ -1,6 +1,7 @@
 import com.sun.xml.internal.bind.v2.util.ByteArrayOutputStreamEx;
 
 import java.io.*;
+import java.nio.channels.SocketChannel;
 
 
 class DefaultSocketConverter implements  SocketConverter{
@@ -14,6 +15,7 @@ class DefaultSocketConverter implements  SocketConverter{
     BinaryReader reader;
 
     public DefaultSocketConverter(SocketSession session,Serializer serializer){
+
         this.session = session;
 
         if(serializer==null){
@@ -21,11 +23,14 @@ class DefaultSocketConverter implements  SocketConverter{
         }
 
         this.serializer = serializer;
+
         try {
+
             this.in = session.socket.getInputStream();
             this.out = session.socket.getOutputStream();
             this.reader = new BinaryReader(in);
             this.writer = new BinaryWriter(out);
+
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -68,12 +73,20 @@ class DefaultSocketConverter implements  SocketConverter{
 
         writer.writeInt(length);
         writer.writeBytes(buffer);
+        writer.flush();
+
         System.out.println("write object:"+packet.getClass().getName());
     }
 
     private byte[] serialize(Object obj){
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         serializer.serialize(out,obj);
+        try {
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException();
+        }
         return out.toByteArray();
     }
 }
